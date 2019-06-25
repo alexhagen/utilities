@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from PIL import Image
 from xml.etree.ElementTree import Element, SubElement
 from xml.etree import ElementTree
