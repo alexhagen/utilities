@@ -129,11 +129,11 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
 
     outerShapesImage = features.rasterize(outerShapes,
                                out_shape=(src_meta['width'], src_meta['height']),
-                               transform=src_meta['transform'])
+                               transform=src_meta['transform'], fill=0)
 
     innerShapesImage = features.rasterize(outerShapes,
                                    out_shape=(src_meta['width'], src_meta['height']),
-                                   transform=src_meta['transform'])
+                                   transform=src_meta['transform'], fill=0)
 
     totalImage = outerShapesImage + innerShapesImage
     # set interior value to be innerValue
