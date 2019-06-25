@@ -7,6 +7,8 @@ import geopandas as gpd
 import rasterio
 from rasterio import features
 from spacenetutilities.labeltools import coreLabelTools as clT
+from fiona.errors import DriverError
+from fiona._err import CPLE_OpenFailedError  # old versions of fiona threw this error instead
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
@@ -115,7 +117,10 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
     bufferDist = bufferSizePix*src_meta['transform'].a
     if isinstance(geoJson, list):
         geoJson = geoJson[0]
-    source_layer = gpd.read_file(geoJson)
+    try:
+        source_layer = gpd.read_file(geoJson)
+    except (DriverError, CPLE_OpenFailedError):
+        source_layer = gpd.read_file()
     outerShapes = ((geom,value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), borderValue))
     innerShapes = ((geom, value) for geom, value in zip(source_layer.geometry.buffer(-bufferDist), innerShapeValue))
 
@@ -143,7 +148,10 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
     bufferDist = bufferSizePix * src_meta['transform'].a
     if isinstance(geoJson, list):
         geoJson = geoJson[0]
-    source_layer = gpd.read_file(geoJson)
+    try:
+        source_layer = gpd.read_file(geoJson)
+    except (DriverError, CPLE_OpenFailedError):
+        source_layer = gpd.read_file()
     outerShapes = ((geom, value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), borderValue))
     innerShapes = ((geom, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
 
