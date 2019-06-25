@@ -113,7 +113,8 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
     #TODO Implement multi object class segmentation
 
     bufferDist = bufferSizePix*src_meta['transform'].a
-    print(geoJson)
+    with open('/qfs/projects/sgdatasc/error.txt', 'w') as f:
+        f.write(geoJson)
     source_layer = gpd.read_file(geoJson)
     outerShapes = ((geom,value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), borderValue))
     innerShapes = ((geom, value) for geom, value in zip(source_layer.geometry.buffer(-bufferDist), innerShapeValue))
