@@ -120,7 +120,7 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
     try:
         source_layer = gpd.read_file(geoJson)
     except (DriverError, CPLE_OpenFailedError):
-        empty_geojson = '{"type": "FeatureCollection", "features": []}'
+        empty_geojson = '{"type": "FeatureCollection", "features": [], "geometry": []}'
         with open('__empty.geojson', 'w') as f:
             f.write(empty_geojson)
         source_layer = gpd.read_file('__empty.geojson')
@@ -154,7 +154,7 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
     try:
         source_layer = gpd.read_file(geoJson)
     except (DriverError, CPLE_OpenFailedError):
-        empty_geojson = '{"type": "FeatureCollection", "features": []}'
+        empty_geojson = '{"type": "FeatureCollection", "features": [], "geometry": []}'
         with open('__empty.geojson', 'w') as f:
             f.write(empty_geojson)
         source_layer = gpd.read_file('__empty.geojson')
