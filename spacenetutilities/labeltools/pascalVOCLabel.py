@@ -5,6 +5,8 @@ from xml.etree.ElementTree import Element, SubElement
 from xml.etree import ElementTree
 from xml.dom import minidom
 import geopandas as gpd
+import shapely
+import json
 import rasterio
 from rasterio import features
 from spacenetutilities.labeltools import coreLabelTools as clT
@@ -166,16 +168,16 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
         with open('__empty.geojson', 'w') as f:
             f.write(empty_geojson)
         source_layer = gpd.read_file('__empty.geojson')
-    outerShapes = list((gpd.GeoSeries(geom).__geo_interface__, borderValue) for geom in source_layer.geometry.buffer(bufferDist))
+    outerShapes = list((geom, borderValue) for geom in source_layer.geometry.buffer(bufferDist))
     innerShapes = list((gpd.GeoSeries(geom).__geo_interface__, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
     if len(outerShapes) > 0:
-        outerShapesImage = features.rasterize(outerShapes,
+        outerShapesImage = borderValue * features.rasterize(list(source_layer.geometry.buffer(bufferDist)),
                                    out_shape=(src_meta['width'], src_meta['height']),
                                    transform=src_meta['transform'])
     else:
         outerShapesImage = np.ones((src_meta['width'], src_meta['height']))
     if len(innerShapes) > 0:
-        innerShapesImage = features.rasterize(innerShapes,
+        innerShapesImage = innerShapeValue * features.rasterize(list(source_layer.geometry.buffer(-bufferDist)),
                                        out_shape=(src_meta['width'], src_meta['height']),
                                        transform=src_meta['transform'])
     else:
