@@ -125,8 +125,8 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
         with open('__empty.geojson', 'w') as f:
             f.write(empty_geojson)
         source_layer = gpd.read_file('__empty.geojson')
-    outerShapes = list((geom, value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), [borderValue for _ in source_layer.geometry.buffer(bufferDist)]))
-    innerShapes = list((geom, value) for geom, value in zip(source_layer.geometry.buffer(-bufferDist), [innerShapeValue for _ in source_layer.geometry.buffer(-bufferDist)]))
+    outerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), [borderValue for _ in source_layer.geometry.buffer(bufferDist)]))
+    innerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, value) for geom, value in zip(source_layer.geometry.buffer(-bufferDist), [innerShapeValue for _ in source_layer.geometry.buffer(-bufferDist)]))
     print(outerShapes, innerShapes)
     if len(outerShapes) > 0:
         outerShapesImage = features.rasterize(outerShapes,
@@ -164,8 +164,8 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
         with open('__empty.geojson', 'w') as f:
             f.write(empty_geojson)
         source_layer = gpd.read_file('__empty.geojson')
-    outerShapes = list((geom, value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), [borderValue for _ in source_layer.geometry.buffer(bufferDist)]))
-    innerShapes = list((geom, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
+    outerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), [borderValue for _ in source_layer.geometry.buffer(bufferDist)]))
+    innerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
     if len(outerShapes) > 0:
         outerShapesImage = features.rasterize(outerShapes,
                                    out_shape=(src_meta['width'], src_meta['height']),
