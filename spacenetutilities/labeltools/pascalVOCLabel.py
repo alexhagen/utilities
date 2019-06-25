@@ -6,6 +6,7 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 import geopandas as gpd
 import rasterio
+import shapely
 from rasterio import features
 from spacenetutilities.labeltools import coreLabelTools as clT
 from fiona.errors import DriverError
