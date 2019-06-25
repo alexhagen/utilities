@@ -128,7 +128,10 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
     outerShapes = list((gpd.GeoSeries(geom).__geo_interface__, borderValue) for geom in source_layer.geometry.buffer(bufferDist))
     print(outerShapes)
     print(innerShapeValue)
-    print(list(source_layer.geometry.buffer(-bufferDist)))
+    inner_shape_polys = list(source_layer.geometry.buffer(-bufferDist)))
+    shape1 = gpd.GeoSeries(inner_shape_polys[0])
+    print(shape1)
+    print(shape1.__geo_interface__)
     innerShapes = list((gpd.GeoSeries(geom).__geo_interface__, innerShapeValue) for geom in source_layer.geometry.buffer(-bufferDist))
     print(innerShapes)
     if len(outerShapes) > 0:
