@@ -6,7 +6,6 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 import geopandas as gpd
 import rasterio
-import shapely
 from rasterio import features
 from spacenetutilities.labeltools import coreLabelTools as clT
 from fiona.errors import DriverError
@@ -126,8 +125,8 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
         with open('__empty.geojson', 'w') as f:
             f.write(empty_geojson)
         source_layer = gpd.read_file('__empty.geojson')
-    outerShapes = list((shapely.geometry.mapping(geom), borderValue) for geom in source_layer.geometry.buffer(bufferDist))
-    innerShapes = list((shapely.geometry.mapping(geom), innerShapeValue) for geom in source_layer.geometry.buffer(-bufferDist))
+    outerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, borderValue) for geom in source_layer.geometry.buffer(bufferDist))
+    innerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, innerShapeValue) for geom in source_layer.geometry.buffer(-bufferDist))
     print(outerShapes, innerShapes)
     if len(outerShapes) > 0:
         outerShapesImage = features.rasterize(outerShapes,
@@ -165,8 +164,8 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
         with open('__empty.geojson', 'w') as f:
             f.write(empty_geojson)
         source_layer = gpd.read_file('__empty.geojson')
-    outerShapes = list((shapely.geometry.mapping(geom), borderValue) for geom in source_layer.geometry.buffer(bufferDist))
-    innerShapes = list((shapely.geometry.mapping(geom), value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
+    outerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, borderValue) for geom in source_layer.geometry.buffer(bufferDist))
+    innerShapes = list((gpd.GeoSeries([geom]).__geo_interface__, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
     if len(outerShapes) > 0:
         outerShapesImage = features.rasterize(outerShapes,
                                    out_shape=(src_meta['width'], src_meta['height']),
