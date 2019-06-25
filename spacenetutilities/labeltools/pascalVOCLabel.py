@@ -133,13 +133,13 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
                                    out_shape=(src_meta['width'], src_meta['height']),
                                    transform=src_meta['transform'])
     else:
-        outerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
+        outerShapesImage = np.ones((src_meta['width'], src_meta['height']))
     if len(innerShapes) > 0:
         innerShapesImage = features.rasterize(innerShapes,
                                        out_shape=(src_meta['width'], src_meta['height']),
                                        transform=src_meta['transform'])
     else:
-        innerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
+        innerShapesImage = np.ones((src_meta['width'], src_meta['height']))
 
     totalImage = outerShapesImage + innerShapesImage
     # set interior value to be innerValue
@@ -171,13 +171,13 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
                                    out_shape=(src_meta['width'], src_meta['height']),
                                    transform=src_meta['transform'])
     else:
-        outerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
+        outerShapesImage = np.ones((src_meta['width'], src_meta['height']))
     if len(innerShapes) > 0:
         innerShapesImage = features.rasterize(innerShapes,
                                        out_shape=(src_meta['width'], src_meta['height']),
                                        transform=src_meta['transform'])
     else:
-        innerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
+        innerShapesImage = np.ones((src_meta['width'], src_meta['height']))
 
     totalImage = outerShapesImage + innerShapesImage
     # set interior value to be innerValue
