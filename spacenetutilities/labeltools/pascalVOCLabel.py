@@ -126,14 +126,18 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
         source_layer = gpd.read_file('__empty.geojson')
     outerShapes = ((geom, value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), [borderValue for _ in source_layer.geometry.buffer(bufferDist)]))
     innerShapes = ((geom, value) for geom, value in zip(source_layer.geometry.buffer(-bufferDist), [innerShapeValue for _ in source_layer.geometry.buffer(-bufferDist)]))
-
-    outerShapesImage = features.rasterize(outerShapes,
-                               out_shape=(src_meta['width'], src_meta['height']),
-                               transform=src_meta['transform'], fill=0)
-
-    innerShapesImage = features.rasterize(outerShapes,
+    if len(outerShapes) > 0:
+        outerShapesImage = features.rasterize(outerShapes,
                                    out_shape=(src_meta['width'], src_meta['height']),
-                                   transform=src_meta['transform'], fill=0)
+                                   transform=src_meta['transform'])
+    else:
+        outerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
+    if len(innerShapes) > 0:
+        innerShapesImage = features.rasterize(innerShapes,
+                                       out_shape=(src_meta['width'], src_meta['height']),
+                                       transform=src_meta['transform'])
+    else:
+        innerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
 
     totalImage = outerShapesImage + innerShapesImage
     # set interior value to be innerValue
@@ -160,14 +164,18 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
         source_layer = gpd.read_file('__empty.geojson')
     outerShapes = ((geom, value) for geom, value in zip(source_layer.geometry.buffer(bufferDist), [borderValue for _ in source_layer.geometry.buffer(bufferDist)]))
     innerShapes = ((geom, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
-
-    outerShapesImage = features.rasterize(outerShapes,
-                                          out_shape=(src_meta['width'], src_meta['height']),
-                                          transform=src_meta['transform'])
-
-    innerShapesImage = features.rasterize(outerShapes,
-                                          out_shape=(src_meta['width'], src_meta['height']),
-                                          transform=src_meta['transform'])
+    if len(outerShapes) > 0:
+        outerShapesImage = features.rasterize(outerShapes,
+                                   out_shape=(src_meta['width'], src_meta['height']),
+                                   transform=src_meta['transform'])
+    else:
+        outerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
+    if len(innerShapes) > 0:
+        innerShapesImage = features.rasterize(innerShapes,
+                                       out_shape=(src_meta['width'], src_meta['height']),
+                                       transform=src_meta['transform'])
+    else:
+        innerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
 
     totalImage = outerShapesImage + innerShapesImage
     # set interior value to be innerValue
