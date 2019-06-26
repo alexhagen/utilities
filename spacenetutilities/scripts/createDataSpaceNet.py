@@ -295,6 +295,7 @@ if __name__ == '__main__':
         print('fullpathImageDirectory = {}'.format(fullPathImageDirectory))
         print('fullpathGeoJsonDirectory = {}'.format(fullPathGeoJsonDirectory))
         if len(listofRaster) != len(listofgeojson):
+            print("List of Raster: {}, List of Geojson: {}".format(len(listofRaster), len(listofgeojson)))
             print('Error lists do not match fix source errors')
 
             break
@@ -330,4 +331,3 @@ if __name__ == '__main__':
                                 annotationType=args.annotationType,
                                 shuffleList=True
                                 )
-

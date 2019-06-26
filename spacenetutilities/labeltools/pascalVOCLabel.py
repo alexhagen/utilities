@@ -122,24 +122,23 @@ def geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
         geoJson = geoJson[0]
     try:
         source_layer = gpd.read_file(geoJson)
+        outerShapes = list((geom, borderValue) for geom in source_layer.geometry.buffer(bufferDist) if not geom.is_empty)
+        innerShapes = list((geom, innerShapeValue) for geom in source_layer.geometry.buffer(-bufferDist) if not geom.is_empty)
     except (DriverError, CPLE_OpenFailedError):
-        empty_geojson = '{"type": "FeatureCollection", "features": [], "geometry": []}'
-        with open('__empty.geojson', 'w') as f:
-            f.write(empty_geojson)
-        source_layer = gpd.read_file('__empty.geojson')
-    outerShapes = list((gpd.GeoSeries(geom).to_json(), borderValue) for geom in source_layer.geometry.buffer(bufferDist) if not geom.is_empty)
-    print(outerShapes)
-    print(innerShapeValue)
-    innerShapes = list((gpd.GeoSeries(geom).to_json(), innerShapeValue) for geom in source_layer.geometry.buffer(-bufferDist) if not geom.is_empty)
-    print(innerShapes)
+        #empty_geojson = '{"type": "FeatureCollection", "features": []}'
+        #with open('__empty.geojson', 'w') as f:
+        #    f.write(empty_geojson)
+        #source_layer = gpd.read_file('__empty.geojson')
+        outerShapes = list()
+        innerShapes = list()
     if len(outerShapes) > 0:
-        outerShapesImage = borderValue * features.rasterize(list(source_layer.geometry.buffer(bufferDist)),
+        outerShapesImage = features.rasterize(outerShapes,
                                    out_shape=(src_meta['width'], src_meta['height']),
                                    transform=src_meta['transform'])
     else:
         outerShapesImage = np.ones((src_meta['width'], src_meta['height']))
     if len(innerShapes) > 0:
-        innerShapesImage = innerShapeValue * features.rasterize(list(source_layer.geometry.buffer(-bufferDist)),
+        innerShapesImage = features.rasterize(innerShapes,
                                        out_shape=(src_meta['width'], src_meta['height']),
                                        transform=src_meta['transform'])
     else:
@@ -163,27 +162,29 @@ def geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
         geoJson = geoJson[0]
     try:
         source_layer = gpd.read_file(geoJson)
+        outerShapes = list((geom, borderValue) for geom in source_layer.geometry.buffer(bufferDist) if not geom.is_empty)
+        innerShapes = list((geom, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)) if not geom.is_empty)
     except (DriverError, CPLE_OpenFailedError):
-        empty_geojson = '{"type": "FeatureCollection", "features": [], "geometry": []}'
-        with open('__empty.geojson', 'w') as f:
-            f.write(empty_geojson)
-        source_layer = gpd.read_file('__empty.geojson')
-    outerShapes = list((geom, borderValue) for geom in source_layer.geometry.buffer(bufferDist))
-    innerShapes = list((gpd.GeoSeries(geom).__geo_interface__, value) for value, geom in enumerate(source_layer.geometry.buffer(-bufferDist)))
+        #empty_geojson = '{"type": "FeatureCollection", "features": []}'
+        #with open('__empty.geojson', 'w') as f:
+        #    f.write(empty_geojson)
+        #source_layer = gpd.read_file('__empty.geojson')
+        outerShapes = list()
+        innerShapes = list()
     if len(outerShapes) > 0:
-        outerShapesImage = borderValue * features.rasterize(list(source_layer.geometry.buffer(bufferDist)),
+        outerShapesImage = features.rasterize(outerShapes,
                                    out_shape=(src_meta['width'], src_meta['height']),
                                    transform=src_meta['transform'])
     else:
         outerShapesImage = np.ones((src_meta['width'], src_meta['height']))
-    if len(innerShapes) > 0:
-        innerShapesImage = innerShapeValue * features.rasterize(list(source_layer.geometry.buffer(-bufferDist)),
-                                       out_shape=(src_meta['width'], src_meta['height']),
-                                       transform=src_meta['transform'])
-    else:
-        innerShapesImage = np.ones((src_meta['width'], src_meta['height']))
+    #if len(innerShapes) > 0:
+    #    innerShapesImage = features.rasterize(innerShapes,
+    #                                   out_shape=(src_meta['width'], src_meta['height']),
+    #                                   transform=src_meta['transform'])
+    #else:
+    #    innerShapesImage = np.zeros((src_meta['width'], src_meta['height']))
 
-    totalImage = outerShapesImage + innerShapesImage
+    totalImage = outerShapesImage #+ innerShapesImage
     # set interior value to be innerValue
     totalImage[totalImage > 255] = totalImage[totalImage>255]-borderValue
 
@@ -231,11 +232,14 @@ def geoJsonToPASCALVOC2012(xmlFileName, geoJson, rasterImageName, im_id='',
         src_profile = src.profile.copy()
 
 
-
+    if outputFormat == 'JPEG':
+        extension = 'jpg'
+    else:
+        extension = 'tif'
     #Write Segemeentation Images
     if segment:
         if clsPNGName=='':
-            clsPNGName = xmlFileName.replace('.xml', 'segcls.tif')
+            clsPNGName = xmlFileName.replace('.xml', 'segcls.{}'.format(extension))
 
         clsImageArray = geoJsonToPASCALVOC2012SegmentCls(geoJson, src_meta, bufferSizePix=2.5,
                                                          innerShapeValue=100,
@@ -243,16 +247,20 @@ def geoJsonToPASCALVOC2012(xmlFileName, geoJson, rasterImageName, im_id='',
                                                          )
 
         clsImageArray = Image.fromarray(clsImageArray)
+        if clsImageArray.mode != 'RGB' and extension == 'jpg':
+            clsImageArray = clsImageArray.convert('RGB')
         clsImageArray.save(clsPNGName)
 
         if objPNGName=='':
-            objPNGName = xmlFileName.replace('.xml', 'segobj.tif')
+            objPNGName = xmlFileName.replace('.xml', 'segobj.{}'.format(extension))
 
         objImageArray = geoJsonToPASCALVOC2012SegmentObj(geoJson, src_meta, bufferSizePix=2.5,
                                                          innerShapeValue=100,
                                                          borderValue=255
                                                          )
         objImageArray = Image.fromarray(objImageArray)
+        if objImageArray.mode != 'RGB' and extension == 'jpg':
+            objImageArray = objImageArray.convert('RGB')
         objImageArray.save(objPNGName)
 
     if convertTo8Bit:

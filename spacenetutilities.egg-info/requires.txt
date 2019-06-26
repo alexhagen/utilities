@@ -1,10 +1,9 @@
-cython
 geopandas
 numpy
 rtree
 scipy
 osmnx
-centerline
 affine
 tqdm
-rasterio
+rasterio>=1.0a9
+pillow
